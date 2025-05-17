@@ -135,7 +135,7 @@ win_f = font1.render(' Ты победил!!! ',1,(0,255,0))
 lose_f = font1.render(' Ты проиграл ',1,(255,0,0))
 monsters = sprite.Group()
 monsters.add(monsters1,monsters2,monsters3,monsters4,monsters5)
-levels=[{'enemy_count': 3},{'enemy_count': 6},{'enemy_count': 9}]
+levels=[{'enemy_count': 1},{'enemy_count': 5},{'enemy_count': 10},{'enemy_count': 15},{'enemy_count': 20},{'enemy_count': 25}]
 current_level_index = 0
 def load_level(level_index):
     global monsters, kills
@@ -190,9 +190,12 @@ while run:
         monsters.update()
         bullets.draw(window)
         bullets.update()
-        sprite_list2 = sprite.groupcollide(buffs,bullets,True,True)
-        for i in sprite_list2:
-            buffs1 += 1
+        sprite_list2 = sprite.spritecollide(rocket,buffs,True)
+        if sprite.spritecollide(rocket,monsters_bullet,True):
+            finish = True
+            window.blit(lose_f,(260,280))
+            
+
 
         sprites_list = sprite.groupcollide(monsters,bullets,True,True)
         for i in sprites_list:

@@ -1,4 +1,3 @@
-#Создай собственный Шутер!
 from pygame import *
 from random import randint, random
 mixer.init()
@@ -46,16 +45,21 @@ class Player(GameSprite):
         y = self.rect.top
         bullet = Bullet('bullet.png',10,10,6,x,y) 
         bullets.add(bullet)
+
     def apply_buff(self, buff):
         if buff.type == "speed":
             self.speed += buff.value
         elif buff.type == "health":
             self.health += buff.value
+    
     def remove_buff(self, buff):
         if buff.type == "speed":
             self.speed -= buff.value
         elif buff.type == "health":
             self.health -= buff.value
+    
+
+    
 
 
 
@@ -72,7 +76,7 @@ class Enemy(GameSprite):
         if self.rect.y >= 500:
             self.rect.y = -100 
             self.rect.x = randint(1,700)
-            self.speed = randint(3,7)
+            self.speed = randint(2,5)
             lost += 1
      
     def shoot(self):
@@ -102,9 +106,9 @@ class Monster_Bullet(GameSprite):
         if self.rect.y > 499:
             self.kill()
 class Buff(GameSprite):
-    def __init__(self, filename,w,h,speed,x,y,duration):
+    def __init__(self, filename,w,h,speed,x,y):
         super().__init__(filename,w,h,speed,x,y)
-        self.duration = duration
+        self.duration = 2500
         self.start_time = time.get_ticks()
         self.active = True
 
@@ -115,31 +119,31 @@ class Buff(GameSprite):
 
 
 
-
 buffs = sprite.Group()
 monsters_bullet = sprite.Group()
 bullets = sprite.Group()
 menu = True
 finish = False
-button = GameSprite('button.png',120,120,0,300,120)
+button = GameSprite('button.png',200,140,0,235,150)
 rocket = Player('rocket.png',65,65,10,50,400)
-monsters1 = Enemy('ufo.png',65,39,randint(3,7,),randint(0,600),-60)
-monsters2 = Enemy('ufo.png',65,39,randint(3,7,),randint(0,600),-60)
-monsters3= Enemy('ufo.png',65,39,randint(3,7,),randint(0,600),-60)
-monsters4 = Enemy('ufo.png',65,39,randint(3,7,),randint(0,600),-60)
-monsters5 = Enemy('ufo.png',65,39,randint(3,7,),randint(0,600),-60)
+monsters1 = Enemy('ufo.png',65,39,randint(2,5,),randint(0,600),-60)
+monsters2 = Enemy('ufo.png',65,39,randint(2,5,),randint(0,600),-60)
+monsters3= Enemy('ufo.png',65,39,randint(2,5,),randint(0,600),-60)
+monsters4 = Enemy('ufo.png',65,39,randint(2,5,),randint(0,600),-60)
+monsters5 = Enemy('ufo.png',65,39,randint(2,5,),randint(0,600),-60)
 win_f = font1.render(' Ты победил!!! ',1,(0,255,0))
 lose_f = font1.render(' Ты проиграл ',1,(255,0,0))
 monsters = sprite.Group()
 monsters.add(monsters1,monsters2,monsters3,monsters4,monsters5)
-levels=[{'enemy_count': 5},{'enemy_count': 10},{'enemy_count': 15}]
+levels=[{'enemy_count': 3},{'enemy_count': 6},{'enemy_count': 9}]
 current_level_index = 0
 def load_level(level_index):
-    global monsters
+    global monsters, kills
+    kills = 0
     monsters.empty()
     level_data = levels[level_index]
     for i in range(level_data['enemy_count']):
-        monsters.add(Enemy('ufo.png',65,39,randint(3,7,),randint(0,600),-60))
+        monsters.add(Enemy('ufo.png',65,39,randint(2,5),randint(0,600),-60))
 def check_level_complete(level_index):
     level_data = levels[level_index]
     return kills == level_data['enemy_count']
@@ -150,6 +154,7 @@ clock = time.Clock()
 FPS = 60
 lost = 0
 kills = 0
+buffs1 = 0
 while run:
 
     if menu:
@@ -165,14 +170,16 @@ while run:
     if finish != True and menu == False:
         window.blit(space,(0,0))
         if random() < 0.01:  
-            buffs.add(Buff('ppp.png',20,20,6,x,y,(randint(0, 780), randint(0, 580), 5000)))
+            buffs.add(Buff('qwe.png',40,40,6, randint(0, 780), randint(0, 580)))
 
         for monster in monsters:
             monster.shoot()
         text_lose = font2.render('Пропущено: '+str(lost),1,(255,255,255))
         text_win = font2.render('Счет: '+str(kills),1,(255,255,255))
+
         window.blit(text_lose,(50,50))
         window.blit(text_win,(50,90))
+        
         monsters_bullet.draw(window)
         monsters_bullet.update()
         buffs.update()
@@ -183,6 +190,10 @@ while run:
         monsters.update()
         bullets.draw(window)
         bullets.update()
+        sprite_list2 = sprite.groupcollide(buffs,bullets,True,True)
+        for i in sprite_list2:
+            buffs1 += 1
+
         sprites_list = sprite.groupcollide(monsters,bullets,True,True)
         for i in sprites_list:
             kills += 1
@@ -194,6 +205,9 @@ while run:
                 load_level(current_level_index)
             else:
                 finish = True
+                window.blit(win_f,(260,280))
+                
+
         # if kills >= 10:
         #     finish = True
         #     window.blit(win_f,(260,280))
